@@ -3,7 +3,7 @@
     <div class="navbar-wrapper">
         <div class="m-header d-flex justify-content-center text-cente mb-2r">
             <a href="../dashboard/index.php" class="b-brand text-primary text-decoration-none d-flex flex-column align-items-center">
-                <img src="/mantis_manajemen_kue_3/assets/images/Logo.png" alt="Logo Narasa" class=" mt-5" style="width: 100px; object-fit: cover;">
+                <img src="/narasa-cake/assets/images/Logo.png" alt="Logo Narasa" class=" mt-5" style="width: 100px; object-fit: cover;">
             </a>
 
         </div>

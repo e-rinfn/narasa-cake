@@ -27,31 +27,31 @@ $userData = getUserData($db, $_SESSION['user_id']);
     <meta name="author" content="CodedThemes">
 
     <!-- [Favicon] icon -->
-    <!-- <link rel="icon" href="/mantis_manajemen_kue_3/assets/images/favicon.svg" type="image/x-icon"> -->
-    <link rel="icon" href="/mantis_manajemen_kue_3/assets/images/Logo.png" type="image/x-icon">
+    <!-- <link rel="icon" href="/narasa-cake/assets/images/favicon.svg" type="image/x-icon"> -->
+    <link rel="icon" href="/narasa-cake/assets/images/Logo.png" type="image/x-icon">
 
     <!-- [Google Font] Family -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" id="main-font-link">
 
     <!-- [Tabler Icons] https://tablericons.com -->
-    <link rel="stylesheet" href="/mantis_manajemen_kue_3/assets/fonts/tabler-icons.min.css">
+    <link rel="stylesheet" href="/narasa-cake/assets/fonts/tabler-icons.min.css">
 
     <!-- [Feather Icons] https://feathericons.com -->
-    <link rel="stylesheet" href="/mantis_manajemen_kue_3/assets/fonts/feather.css">
+    <link rel="stylesheet" href="/narasa-cake/assets/fonts/feather.css">
 
     <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
-    <link rel="stylesheet" href="/mantis_manajemen_kue_3/assets/fonts/fontawesome.css">
+    <link rel="stylesheet" href="/narasa-cake/assets/fonts/fontawesome.css">
 
     <!-- [Material Icons] https://fonts.google.com/icons -->
-    <link rel="stylesheet" href="/mantis_manajemen_kue_3/assets/fonts/material.css">
+    <link rel="stylesheet" href="/narasa-cake/assets/fonts/material.css">
 
     <!-- [Select2 CSS] -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
     <!-- [Template CSS Files] -->
-    <link rel="stylesheet" href="/mantis_manajemen_kue_3/assets/css/style.css" id="main-style-link">
-    <link rel="stylesheet" href="/mantis_manajemen_kue_3/assets/css/style-preset.css">
+    <link rel="stylesheet" href="/narasa-cake/assets/css/style.css" id="main-style-link">
+    <link rel="stylesheet" href="/narasa-cake/assets/css/style-preset.css">
 
     <!-- [Inline CSS for Select2] -->
     <style>
