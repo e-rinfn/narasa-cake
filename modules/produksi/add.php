@@ -76,13 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             throw new Exception(nl2br(htmlentities($pesan)));
         }
 
-        // 5. Insert data produksi
-        $stmt = $db->prepare("INSERT INTO produksi (id_resep, jumlah_batch, total_kue, tanggal_produksi, id_admin, catatan) 
-                     VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$id_resep, $jumlah_batch, $total_kue, $tanggal_produksi, $id_admin, $catatan]);
-        $id_produksi = $db->lastInsertId();
-
-        // 6. Kurangi stok bahan dan catat penggunaan
+        // 5. Kurangi stok bahan dan catat penggunaan
         foreach ($detail_resep as $bahan) {
             $jumlah_dibutuhkan = $bahan['jumlah'] * $jumlah_batch;
 
