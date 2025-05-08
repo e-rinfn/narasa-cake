@@ -109,9 +109,24 @@ if ($id_jenis_kue) {
 $pdf->Ln(5);
 
 // Total Penjualan
+// $pdf->SetFont('helvetica', 'B', 10);
+// $pdf->Cell(40, 5, 'Total Penjualan:', 0, 0);
+// $pdf->Cell(0, 5, rupiah($total_penjualan), 0, 1);
+// $pdf->Ln(5);
+
+// Total Penjualan dan Total Kue (horizontal)
 $pdf->SetFont('helvetica', 'B', 10);
+
+$total_kue_semua = array_sum(array_column($penjualan, 'total_kue'));
+
+// Total Penjualan
 $pdf->Cell(40, 5, 'Total Penjualan:', 0, 0);
-$pdf->Cell(0, 5, rupiah($total_penjualan), 0, 1);
+$pdf->Cell(55, 5, rupiah($total_penjualan), 0, 0);
+
+// Total Kue Terjual
+$pdf->Cell(40, 5, 'Total Penjualan Kue:', 0, 0);
+$pdf->Cell(0, 5, number_format($total_kue_semua, 0, ',', '.') . ' pcs', 0, 1);
+
 $pdf->Ln(5);
 
 // Tabel
