@@ -45,8 +45,9 @@ header("Content-Disposition: inline; filename=INV-" . str_pad($id_penjualan, 6, 
 // Gunakan library TCPDF
 require_once('../../vendor/autoload.php');
 
-// Buat PDF baru dengan ukuran A5 Landscape
-$pdf = new TCPDF('L', 'mm', 'A5', true, 'UTF-8', false);
+
+// Buat PDF baru dengan ukuran custom 21 cm x 14 cm (Continuous Form)
+$pdf = new TCPDF('L', 'mm', array(210, 140), true, 'UTF-8', false);
 
 // Set dokumen informasi
 $pdf->SetCreator('Sistem Kue');
@@ -54,140 +55,153 @@ $pdf->SetAuthor('Sistem Kue');
 $pdf->SetTitle('Invoice #' . str_pad($id_penjualan, 6, '0', STR_PAD_LEFT));
 $pdf->SetSubject('Invoice Penjualan');
 
-// Set margins untuk membuat konten lebih ke tengah
-$pdf->SetMargins(15, 15, 15);
-$pdf->SetAutoPageBreak(true, 15);
+// Set margins (diperkecil untuk memaksimalkan ruang)
+$pdf->SetMargins(8, 8, 8);
+$pdf->SetAutoPageBreak(true, 8);
 
 // Tambah halaman
 $pdf->AddPage();
 
-// Hitung lebar halaman
-$pageWidth = $pdf->GetPageWidth();
-$contentWidth = $pageWidth - 30; // 15 margin kiri + 15 margin kanan
-
-// Tambahkan logo di sebelah kiri
+// Tambahkan logo jika tersedia
 $logoPath = '../../assets/images/logo.png';
 if (file_exists($logoPath)) {
-    $pdf->Image($logoPath, 25, 20, 20, 0, 'PNG');
-    $pdf->SetY(35);
-} else {
-    $pdf->SetY(25);
+    $pdf->Image($logoPath, 25, 12, 18);
 }
 
-// Header invoice
-$pdf->SetY(20);
-$pdf->SetFont('helvetica', 'B', 12);
-$pdf->Cell(0, 6, 'NARASA CAKE & BAKERY', 0, 1, 'C');
+// Header toko
+$pdf->SetFont('helvetica', 'B', 11);
+$pdf->Cell(0, 8, 'NARASA CAKE & BAKERY', 0, 1, 'C');
+
 $pdf->SetFont('helvetica', '', 6);
-$pdf->Cell(0, 3, 'Jl. Raya Pagerageung No.182, Sukadana, Kec. Pagerageung, Kab. Tasikmalaya, Jawa Barat 46413', 0, 1, 'C');
-$pdf->Ln(3);
+$pdf->Cell(0, 3, 'Jl. Raya Pagerageung No.182, Sukadana', 0, 1, 'C');
+$pdf->Cell(0, 3, 'Kec. Pagerageung, Kab. Tasikmalaya, Jawa Barat 46413', 0, 1, 'C');
+
+$pdf->Ln(2);
 
 // Judul invoice
 $pdf->SetFont('helvetica', 'B', 10);
 $pdf->Cell(0, 6, 'INVOICE PENJUALAN', 0, 1, 'C');
-$pdf->Ln(2);
+$pdf->Ln(1);
 
-// Informasi invoice
-$col1Width = 40;
-$col2Width = $contentWidth - $col1Width;
-$pdf->SetFont('helvetica', '', 8);
+// Informasi invoice - digeser ke kanan 10mm
+$pdf->SetFont('helvetica', '', 7);
+$pdf->SetX(18); // Geser mulai dari posisi 18mm (default margin kiri 8mm + 10mm)
 
-// No. Invoice
-$pdf->Cell($col1Width, 4, 'No. Invoice', 0, 0);
-$pdf->Cell(5, 4, ':', 0, 0);
-$pdf->Cell($col2Width - 5, 4, 'INV-' . str_pad($id_penjualan, 6, '0', STR_PAD_LEFT), 0, 1);
+$pdf->Cell(25, 4, 'No. Invoice', 0, 0);
+$pdf->Cell(3, 4, ':', 0, 0);
+$pdf->Cell(60, 4, 'INV-' . str_pad($id_penjualan, 6, '0', STR_PAD_LEFT), 0, 1);
+$pdf->SetX(18); // Set posisi X lagi untuk baris baru
 
-// Tanggal
-$pdf->Cell($col1Width, 4, 'Tanggal', 0, 0);
-$pdf->Cell(5, 4, ':', 0, 0);
-$pdf->Cell($col2Width - 5, 4, formatTanggalIndo($penjualan['tanggal_penjualan']), 0, 1);
-// Pelanggan
-$pdf->Cell($col1Width, 4, 'Pelanggan', 0, 0);
-$pdf->Cell(5, 4, ':', 0, 0);
-$pdf->Cell($col2Width - 5, 4, $penjualan['nama_pelanggan'] ?? 'Umum', 0, 1);
+$pdf->Cell(25, 4, 'Tanggal', 0, 0);
+$pdf->Cell(3, 4, ':', 0, 0);
+$pdf->Cell(60, 4, formatTanggalIndo($penjualan['tanggal_penjualan']), 0, 1);
+$pdf->SetX(18);
 
-// Jika ada alamat dan no telepon pelanggan
-if ($penjualan['nama_pelanggan']) {
-    $pdf->Cell($col1Width, 4, 'Alamat', 0, 0);
-    $pdf->Cell(5, 4, ':', 0, 0);
-    $pdf->MultiCell($col2Width - 5, 4, $penjualan['alamat'] ?? '-', 0, 1);
+$pdf->Cell(25, 4, 'Pelanggan', 0, 0);
+$pdf->Cell(3, 4, ':', 0, 0);
+$pdf->Cell(60, 4, $penjualan['nama_pelanggan'] ?? 'Umum', 0, 1);
+$pdf->SetX(18);
 
-    $pdf->Cell($col1Width, 4, 'No. Telepon', 0, 0);
-    $pdf->Cell(5, 4, ':', 0, 0);
-    $pdf->Cell($col2Width - 5, 4, $penjualan['no_telepon'] ?? '-', 0, 1);
+if (!empty($penjualan['alamat'])) {
+    $pdf->Cell(25, 4, 'Alamat', 0, 0);
+    $pdf->Cell(3, 4, ':', 0, 0);
+    $pdf->MultiCell(60, 4, $penjualan['alamat'], 0, 'L');
+    $pdf->SetX(18);
 }
 
-// Kasir
-$pdf->Cell($col1Width, 4, 'Kasir', 0, 0);
-$pdf->Cell(5, 4, ':', 0, 0);
-$pdf->Cell($col2Width - 5, 4, $penjualan['nama_admin'], 0, 1);
-$pdf->Ln(5);
+if (!empty($penjualan['no_telepon'])) {
+    $pdf->Cell(25, 4, 'No. Telepon', 0, 0);
+    $pdf->Cell(3, 4, ':', 0, 0);
+    $pdf->Cell(60, 4, $penjualan['no_telepon'], 0, 1);
+    $pdf->SetX(18);
+}
 
-// Tabel detail penjualan dengan kolom poin di kanan
-$colNo = 10;
-$colNama = 50;  // Dikurangi untuk memberi ruang kolom poin
-$colHarga = 20;
-$colNabung = 30;
-$colJumlah = 20;
-$colSubtotal = 25;
-$colPoin = 25; // Lebar kolom Poin
+$pdf->Cell(25, 4, 'Kasir', 0, 0);
+$pdf->Cell(3, 4, ':', 0, 0);
+$pdf->Cell(60, 4, $penjualan['nama_admin'], 0, 1);
+$pdf->Ln(3);
 
-// Header tabel
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell($colNo, 6, 'No', 1, 0, 'C');
-$pdf->Cell($colNama, 6, 'Nama Kue', 1, 0, 'C');
-$pdf->Cell($colJumlah, 6, 'QTY', 1, 0, 'C');
-$pdf->Cell($colHarga, 6, 'Harga', 1, 0, 'C');
-$pdf->Cell($colNabung, 6, 'Nabung per Kue', 1, 0, 'C');
-$pdf->Cell($colSubtotal, 6, 'Subtotal Kue', 1, 0, 'C');
-$pdf->Cell($colPoin, 6, 'Subtotal Nabung', 1, 1, 'C'); // Kolom poin di kanan
+// Hitung lebar kolom tabel
+$pageWidth = 210 - 16; // Total lebar halaman - margin kiri dan kanan (8+8)
+$colNo = 8;           // No
+$colNama = 40;        // Nama Kue (diperlebar)
+$colQty = 20;         // QTY
+$colHarga = 20;       // Harga
+$colNabung = 27;      // Nabung
+$colSubtotal = 30;    // Subtotal
+$colTotalNabung = 30; // Total Nabung
 
-// Isi tabel
-$pdf->SetFont('helvetica', '', 8);
+// Pastikan total lebar kolom tidak melebihi lebar halaman
+$totalColWidth = $colNo + $colNama + $colQty + $colHarga + $colNabung + $colSubtotal + $colTotalNabung;
+if ($totalColWidth > $pageWidth) {
+    // Jika melebihi, sesuaikan lebar kolom nama
+    $colNama = $colNama - ($totalColWidth - $pageWidth);
+}
+
+// Tabel header
+$pdf->SetX(18);
+$pdf->SetFont('helvetica', 'B', 6);
+$pdf->Cell($colNo, 5, 'No', 1, 0, 'C');
+$pdf->Cell($colNama, 5, 'Nama Kue', 1, 0, 'C');
+$pdf->Cell($colQty, 5, 'QTY', 1, 0, 'C');
+$pdf->Cell($colHarga, 5, 'Harga', 1, 0, 'C');
+$pdf->Cell($colNabung, 5, 'Nabung', 1, 0, 'C');
+$pdf->Cell($colSubtotal, 5, 'Subtotal', 1, 0, 'C');
+$pdf->Cell($colTotalNabung, 5, 'Subtotal Nabung', 1, 1, 'C');
+
+// Tabel isi
+$pdf->SetFont('helvetica', '', 6);
 foreach ($detail as $i => $row) {
-    $pdf->Cell($colNo, 6, $i + 1, 1, 0, 'C');
-    $pdf->Cell($colNama, 6, $row['nama_kue'], 1, 0);
-    $pdf->Cell($colJumlah, 6, $row['jumlah'] . " pcs", 1, 0, 'C');
-    $pdf->Cell($colHarga, 6, rupiah($row['harga_satuan']), 1, 0, 'R');
-    $pdf->Cell($colNabung, 6, ($row['poin_diberikan'] / $row['jumlah']), 1, 0, 'C');
-    $pdf->Cell($colSubtotal, 6, rupiah($row['subtotal']), 1, 0, 'R');
-    $pdf->Cell($colPoin, 6, rupiah($row['poin_diberikan']), 1, 1, 'C'); // Kolom poin di kanan
+    $pdf->SetX(18); // Set posisi X untuk setiap baris
+    $namaKue = (strlen($row['nama_kue']) > 40 ? substr($row['nama_kue'], 0, 37) . '...' : $row['nama_kue']);
+
+    $pdf->Cell($colNo, 5, $i + 1, 1, 0, 'C');
+    $pdf->Cell($colNama, 5, $namaKue, 1, 0);
+    $pdf->Cell($colQty, 5, $row['jumlah'], 1, 0, 'C');
+    $pdf->Cell($colHarga, 5, rupiah($row['harga_satuan']), 1, 0, 'R');
+    $pdf->Cell($colNabung, 5, rupiah($row['poin_diberikan'] / $row['jumlah']), 1, 0, 'R');
+    $pdf->Cell($colSubtotal, 5, rupiah($row['subtotal']), 1, 0, 'R');
+    $pdf->Cell($colTotalNabung, 5, rupiah($row['poin_diberikan']), 1, 1, 'R');
 }
 
-// Total - atur lebar untuk penyesuaian
-$totalLabelWidth = $colNo + $colNama + $colHarga + $colJumlah + $colNabung; // Lebar label total
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell($totalLabelWidth, 6, 'Jumlah Subtotal', 1, 0, 'R');
-$pdf->Cell($colSubtotal, 6, rupiah($penjualan['total_harga'] - $total_poin), 1, 0, 'R');
-$pdf->Cell($colPoin, 6, rupiah($total_poin), 1, 1, 'C'); // Total poin di kolom kanan
+// Tabel footer
+$pdf->SetX(18);
+$pdf->SetFont('helvetica', 'B', 6);
+$pdf->Cell($colNo + $colNama + $colQty + $colHarga + $colNabung, 5, 'Jumlah Subtotal', 1, 0, 'R');
+$pdf->Cell($colSubtotal, 5, rupiah($penjualan['total_harga'] - $total_poin), 1, 0, 'R');
+$pdf->Cell($colTotalNabung, 5, rupiah($total_poin), 1, 1, 'R');
 
-// Total - atur lebar untuk penyesuaian
-$totalLabelWidth = $colNo + $colNama + $colHarga + $colJumlah + $colNabung; // Lebar label total
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell($totalLabelWidth, 6, 'Total', 1, 0, 'R');
-$pdf->Cell($colSubtotal, 6, rupiah($penjualan['total_harga']), 1, 1, 'R');
+$pdf->SetX(18);
+$pdf->Cell($colNo + $colNama + $colQty + $colHarga + $colNabung, 5, 'Total', 1, 0, 'R');
+$pdf->Cell($colSubtotal, 5, rupiah($penjualan['total_harga']), 1, 1, 'R');
 
+// Tanda tangan
+$pdf->Ln(6);
+$pdf->SetFont('helvetica', '', 7);
 
-// Spasi sebelum tanda tangan
+// Hitung posisi tanda tangan
+$tandaTanganWidth = 50;
+$spasiAntarKolom = 20;
+$totalWidth = (2 * $tandaTanganWidth) + $spasiAntarKolom;
+$startX = ($pageWidth - $totalWidth) / 2 + 8; // Ditambah margin kiri
+
+$pdf->SetX($startX);
+$pdf->Cell($tandaTanganWidth, 4, 'Penerima', 0, 0, 'C');
+$pdf->Cell($spasiAntarKolom, 4, '', 0, 0);
+$pdf->Cell($tandaTanganWidth, 4, 'Pengirim', 0, 1, 'C');
+
 $pdf->Ln(10);
+$pdf->SetX($startX);
+$pdf->Cell($tandaTanganWidth, 4, '_________________________', 0, 0, 'C');
+$pdf->Cell($spasiAntarKolom, 4, '', 0, 0);
+$pdf->Cell($tandaTanganWidth, 4, '_________________________', 0, 1, 'C');
 
-// Judul tanda tangan kiri dan kanan
-$pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(90, 5, 'Penerima', 0, 0, 'L');
-$pdf->Cell(90, 5, 'Pengirim', 0, 1, 'R');
-
-// Spasi untuk tanda tangan
-// $pdf->Ln(0);
-
-// $pdf->Cell(90, 0, '_________________________', 0, 0, 'L');
-// $pdf->Cell(90, 0, '_________________________', 0, 1, 'R');
-
-// Catatan jika ada
-if ($penjualan['catatan']) {
+// Catatan
+if (!empty($penjualan['catatan'])) {
     $pdf->Ln(4);
-    $pdf->SetFont('helvetica', 'I', 7);
-    $pdf->MultiCell(0, 4, 'Catatan: ' . $penjualan['catatan'], 0, 'C');
+    $pdf->SetFont('helvetica', 'I', 5);
+    $pdf->MultiCell(0, 3, 'Catatan: ' . $penjualan['catatan'], 0, 'C');
 }
 
-// Output PDF
+// Output
 $pdf->Output('INV-' . str_pad($id_penjualan, 6, '0', STR_PAD_LEFT) . '.pdf', 'I');

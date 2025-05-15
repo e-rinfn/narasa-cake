@@ -1,5 +1,6 @@
 {
     "require": {
-        "tecnickcom/tcpdf": "^6.9"
+        "tecnickcom/tcpdf": "^6.9",
+        "mike42/escpos-php": "^2.2"
     }
 }

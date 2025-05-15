@@ -179,7 +179,14 @@ include '../../includes/header.php';
                                                     <a href="detail.php?id=<?= $row['id_penjualan'] ?>" class="btn btn-sm btn-info" title="Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="invoice.php?id=<?= $row['id_penjualan'] ?>" class="btn btn-sm btn-success" title="Cetak" target="_blank">
+
+                                                    <a href="cetak_struk.php?id=<?= $row['id_penjualan'] ?>" class="btn btn-sm btn-warning" title="Cetak escpos" target="_blank">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                    <a href="bon.php?id=<?= $row['id_penjualan'] ?>" class="btn btn-sm btn-danger" title="Cetak Bon" target="_blank">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                    <a href="invoice.php?id=<?= $row['id_penjualan'] ?>" class="btn btn-sm btn-success" title="Cetak Invoice" target="_blank">
                                                         <i class="fas fa-print"></i>
                                                     </a>
                                                 </td>
