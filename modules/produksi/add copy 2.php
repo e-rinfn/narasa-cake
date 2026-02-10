@@ -55,14 +55,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$id_resep, $jumlah_batch, $total_kue, $tanggal_produksi, $id_admin, $catatan]);
         $id_produksi = $db->lastInsertId();
 
-        // 4. Kurangi stok bahan dan catat penggunaan
+        // 4. Cek stok semua bahan terlebih dahulu
+        $stok_kurang = [];
+
+        foreach ($detail_resep as $bahan) {
+            $jumlah_dibutuhkan = $bahan['jumlah'] * $jumlah_batch;
+
+            $stmt = $db->prepare("SELECT SUM(jumlah) FROM stok_bahan WHERE id_bahan = ?");
+            $stmt->execute([$bahan['id_bahan']]);
+            $stok_tersedia = $stmt->fetchColumn() ?? 0;
+
+            if ($stok_tersedia < $jumlah_dibutuhkan) {
+                $nama_bahan = getBahanName($db, $bahan['id_bahan']);
+                $stok_kurang[] = "# $nama_bahan (dibutuhkan: $jumlah_dibutuhkan, tersedia: $stok_tersedia)";
+            }
+        }
+
+        if (!empty($stok_kurang)) {
+            $pesan = "Stok tidak mencukupi: " . implode(", ", $stok_kurang);
+            throw new Exception(nl2br(htmlentities($pesan)));
+        }
+
+        // 5. Kurangi stok bahan dan catat penggunaan
         foreach ($detail_resep as $bahan) {
             $jumlah_dibutuhkan = $bahan['jumlah'] * $jumlah_batch;
 
             // Ambil stok dengan FIFO
             $stmt = $db->prepare("SELECT * FROM stok_bahan 
-                                 WHERE id_bahan = ? AND jumlah > 0 
-                                 ORDER BY tanggal_kadaluarsa ASC");
+                         WHERE id_bahan = ? AND jumlah > 0 
+                         ORDER BY tanggal_kadaluarsa ASC");
             $stmt->execute([$bahan['id_bahan']]);
             $stok = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -74,8 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 // Insert ke penggunaan_bahan
                 $stmt = $db->prepare("INSERT INTO penggunaan_bahan 
-                                     (id_produksi, id_bahan, id_stok, jumlah_digunakan) 
-                                     VALUES (?, ?, ?, ?)");
+                             (id_produksi, id_bahan, id_stok, jumlah_digunakan) 
+                             VALUES (?, ?, ?, ?)");
                 $stmt->execute([$id_produksi, $bahan['id_bahan'], $stok_item['id_stok'], $jumlah_dipakai]);
 
                 // Update stok
@@ -84,20 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 $sisa_kebutuhan -= $jumlah_dipakai;
             }
-
-            // if ($sisa_kebutuhan > 0) {
-            //     // Hitung total stok tersedia
-            //     $stmt = $db->prepare("SELECT SUM(jumlah) FROM stok_bahan WHERE id_bahan = ?");
-            //     $stmt->execute([$bahan['id_bahan']]);
-            //     $stok_tersedia = $stmt->fetchColumn() ?? 0;
-
-            //     $nama_bahan = getBahanName($db, $bahan['id_bahan']);
-            //     throw new Exception("Stok bahan tidak mencukupi untuk $nama_bahan. Dibutuhkan: $jumlah_dibutuhkan");
-            // }
-
         }
 
-        // 5. Tambah stok kue hasil produksi
+        // 7. Tambah stok kue hasil produksi
         $stmt = $db->prepare("SELECT id_jenis_kue FROM resep_kue WHERE id_resep = ?");
         $stmt->execute([$id_resep]);
         $jenis_kue = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -105,9 +115,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $tanggal_kadaluarsa = date('Y-m-d', strtotime($tanggal_produksi . ' +7 days'));
 
         $stmt = $db->prepare("INSERT INTO stok_kue 
-                             (id_jenis_kue, jumlah, tanggal_produksi, tanggal_kadaluarsa) 
-                             VALUES (?, ?, ?, ?)");
+                     (id_jenis_kue, jumlah, tanggal_produksi, tanggal_kadaluarsa) 
+                     VALUES (?, ?, ?, ?)");
         $stmt->execute([$jenis_kue['id_jenis_kue'], $total_kue, $tanggal_produksi, $tanggal_kadaluarsa]);
+
 
         $db->commit();
         redirectWithMessage('add.php', 'success', 'Produksi berhasil dicatat');

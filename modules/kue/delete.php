@@ -4,7 +4,7 @@ require_once '../../includes/functions.php';
 checkAuth();
 
 if (!isset($_GET['id'])) {
-    redirectWithMessage('/mantis_manajemen_kue_3/modules/kue/index.php', 'danger', 'ID jenis kue tidak valid');
+    redirectWithMessage('index.php', 'danger', 'ID jenis kue tidak valid');
 }
 
 $id_jenis_kue = $_GET['id'];
@@ -16,7 +16,7 @@ try {
     $count = $stmt->fetchColumn();
 
     if ($count > 0) {
-        redirectWithMessage('/mantis_manajemen_kue_3/modules/kue/index.php', 'danger', 'Tidak bisa menghapus karena ada resep terkait');
+        redirectWithMessage('index.php', 'danger', 'Tidak bisa menghapus karena ada resep terkait');
     }
 
     // Cek apakah ada stok kue
@@ -25,14 +25,14 @@ try {
     $count = $stmt->fetchColumn();
 
     if ($count > 0) {
-        redirectWithMessage('/mantis_manajemen_kue_3/modules/kue/index.php', 'danger', 'Tidak bisa menghapus karena ada stok kue terkait');
+        redirectWithMessage('index.php', 'danger', 'Tidak bisa menghapus karena ada stok kue terkait');
     }
 
     // Hapus jenis kue
     $stmt = $db->prepare("DELETE FROM jenis_kue WHERE id_jenis_kue = ?");
     $stmt->execute([$id_jenis_kue]);
 
-    redirectWithMessage('/mantis_manajemen_kue_3/modules/kue/index.php', 'success', 'Jenis kue berhasil dihapus');
+    redirectWithMessage('index.php', 'success', 'Jenis kue berhasil dihapus');
 } catch (PDOException $e) {
-    redirectWithMessage('/mantis_manajemen_kue_3/modules/kue/index.php', 'danger', 'Error: ' . $e->getMessage());
+    redirectWithMessage('index.php', 'danger', 'Error: ' . $e->getMessage());
 }

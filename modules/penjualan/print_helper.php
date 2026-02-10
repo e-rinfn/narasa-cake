@@ -2,12 +2,15 @@
 
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 
 function cetakStrukPenjualan($penjualan, $detail)
 {
     try {
         // Ganti nama printer sesuai yang terinstal di sistem (Cek di Control Panel > Printers)
-        $connector = new WindowsPrintConnector("POS-58");
+
+        // $connector = new WindowsPrintConnector("POS-58");
+        $connector = new FilePrintConnector("struk.txt");
         $printer = new Printer($connector);
 
         // Header
@@ -51,7 +54,6 @@ function cetakStrukPenjualan($penjualan, $detail)
         $printer->feed(1);
         $printer->setJustification(Printer::JUSTIFY_CENTER);
         $printer->text("Terima kasih atas kunjungan Anda\n");
-        $printer->text("Barang yang dibeli tidak dapat ditukar\n");
 
         $printer->feed(3);
         $printer->cut();

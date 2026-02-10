@@ -111,7 +111,7 @@ include '../../includes/header.php';
                                                         </thead>
                                                         <tbody>
                                                             <?php foreach ($stok as $i => $row):
-                                                                $sisa_hari = (strtotime($row['tanggal_kadaluarsa']) - strtotime(date('Y-m-d'))) / (60 * 60 * 24);
+                                                                // $sisa_hari = (strtotime($row['tanggal_kadaluarsa']) - strtotime(date('Y-m-d'))) / (60 * 60 * 24);
                                                             ?>
                                                                 <tr class="<?= $sisa_hari <= 3 ? 'table-warning' : '' ?>">
                                                                     <td><?= $i + 1 ?></td>

@@ -2,7 +2,7 @@
 session_start();
 
 $host = 'localhost';
-$dbname = 'sistem_kue';
+$dbname = 'narasa-cake';
 $username = 'root';
 $password = '';
 

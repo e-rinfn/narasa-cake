@@ -6,6 +6,7 @@ checkAuth();
 $page_title = 'Tambah Penjualan';
 $active_page = 'penjualan';
 
+
 // Ambil data kue: total stok per jenis (termasuk expired) + batch tertua (expired atau tidak)
 $sql = "
 SELECT 
@@ -50,6 +51,9 @@ ORDER BY j.nama_kue
 $stmt = $db->prepare($sql);
 $stmt->execute();
 $kue_tersedia = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
 
 // Ambil data pelanggan
 $stmt = $db->query("SELECT * FROM pelanggan ORDER BY nama_pelanggan");
@@ -132,6 +136,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $poin_diberikan
             ]);
         }
+        //     // Update stok kue
+        //     $stmt = $db->prepare("UPDATE stok_kue SET jumlah = jumlah - ? WHERE id_stok_kue = ?");
+        //     $stmt->execute([$jumlah[$i], $id_stok_kue]);
+        // }
 
         // --- Mulai FIFO stock deduction ---
         foreach ($_POST['kue'] as $i => $id_stok_tertua) {
@@ -193,6 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         // --- Selesai FIFO stock deduction ---
 
+
         // 3. Update poin pelanggan jika ada
         if ($id_pelanggan) {
             // Tambah poin baru (dari penjualan ini)
@@ -208,6 +217,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $db->commit();
         redirectWithMessage("index.php", 'success', 'Penjualan berhasil dicatat');
+
+        // redirectWithMessage("invoice.php?id=$id_penjualan", 'success', 'Penjualan berhasil dicatat');
+
     } catch (Exception $e) {
         $db->rollBack();
         redirectWithMessage('add.php', 'danger', 'Error: ' . $e->getMessage());
@@ -216,35 +228,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 include '../../includes/header.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <style>
-        .stock-info {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 3px;
-        }
+<!-- [Head] start -->
+<style>
+    .stock-info {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 3px;
+    }
 
-        .max-stock {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .item-row {
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            padding: 15px;
-            background-color: #f8f9fa;
-        }
-
-        .btn-remove-item {
-            margin-top: 28px;
-        }
-    </style>
-</head>
+    .max-stock {
+        color: #dc3545;
+        font-weight: bold;
+    }
+</style>
+<!-- [Body] Start -->
 
 <body data-pc-preset="preset-1" data-pc-direction="ltr" data-pc-theme="light">
     <!-- [ Pre-loader ] start -->
@@ -256,7 +257,9 @@ include '../../includes/header.php';
     <!-- [ Pre-loader ] End -->
 
     <?php include '../../includes/sidebar.php'; ?>
+
     <?php include '../../includes/navbar.php'; ?>
+
 
     <!-- [ Main Content ] start -->
     <div class="pc-container">
@@ -272,6 +275,7 @@ include '../../includes/header.php';
                             <ul class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="index.php">Penjualan</a></li>
                                 <li class="breadcrumb-item active">Tambah</li>
+
                             </ul>
                         </div>
                     </div>
@@ -339,225 +343,210 @@ include '../../includes/header.php';
                                 <label>Total Harga</label>
                                 <input type="text" id="totalHarga" class="form-control" readonly>
                             </div>
+                            <!-- <div class="form-group">
+                                <label>Total Bayar</label>
+                                <input type="text" id="totalBayar" class="form-control" readonly>
+                            </div> -->
 
                             <button type="button" id="btnSimpan" class="btn btn-primary">Simpan</button>
+
+
                             <a href="index.php" class="btn btn-secondary">Batal</a>
                         </form>
                     </div>
                 </div>
             </div>
             <!-- [ Main Content ] end -->
+
         </div>
     </div>
+</body>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            // Function to format currency
-            function formatCurrency(amount) {
-                return 'Rp ' + amount.toLocaleString('id-ID');
+<!-- Modal Konfirmasi -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Konfirmasi Simpan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menyimpan penjualan ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary" form="formPenjualan">Ya, Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</html>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('btnSimpan').addEventListener('click', function() {
+        Swal.fire({
+            title: 'Konfirmasi',
+            text: 'Apakah Anda yakin ingin menyimpan penjualan ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Submit form secara manual
+                this.closest('form').submit();
             }
+        });
+    });
+</script>
 
-            // Function to calculate total
-            function hitungTotal() {
-                let totalHarga = 0;
 
-                $('.item-row').each(function() {
-                    let harga = parseFloat($(this).find('.harga').val()) || 0;
-                    let jumlah = parseInt($(this).find('.jumlah').val()) || 0;
 
-                    totalHarga += harga * jumlah;
-                });
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Function to update total
+        function hitungTotal() {
+            let totalHarga = 0;
+            let totalPoin = 0;
+            $('#itemContainer .item-row').each(function() {
+                let harga = parseFloat($(this).find('.harga').val());
+                let jumlah = parseInt($(this).find('input[name="jumlah[]"]').val());
+                let diskon = parseFloat($(this).find('.diskon').val()) || 0;
+                let poin = parseInt($(this).find('.poin').val()) || 0;
 
-                $('#totalHarga').val(formatCurrency(totalHarga));
-            }
+                totalHarga += (harga - diskon) * jumlah;
+                totalPoin += poin * jumlah;
+            });
+            let poinDipakai = parseInt($('#poinDipakai').val()) || 0;
+            let totalBayar = totalHarga - poinDipakai;
+            $('#totalHarga').val('Rp ' + totalHarga.toLocaleString());
+            $('#totalBayar').val('Rp ' + totalBayar.toLocaleString());
+        }
 
-            // Function to initialize item events
-            function initItemEvents(item) {
-                let selectKue = item.find('.select-kue');
-                let jumlahInput = item.find('.jumlah');
-                let hargaInput = item.find('.harga');
-                let stockInfo = item.find('.stock-amount');
-                let maxStockInfo = item.find('.max-stock-info');
-
-                // Update stock info and price when cake is selected
-                selectKue.on('change', function() {
-                    let selectedOption = $(this).find('option:selected');
-                    let stock = parseInt(selectedOption.data('stock')) || 0;
-                    let price = parseFloat(selectedOption.data('harga')) || 0;
-                    let expDate = selectedOption.data('exp') || '';
-
-                    // Update display
-                    stockInfo.text(stock);
-                    hargaInput.val(price);
-
-                    // Set max value for quantity input
-                    jumlahInput.attr('max', stock);
-
-                    // Check stock availability
-                    if (stock <= 0) {
-                        maxStockInfo.html('<span class="max-stock">Stok habis!</span>');
-                        jumlahInput.val(0).prop('disabled', true);
-                    } else {
-                        maxStockInfo.html('');
-                        jumlahInput.val(1).prop('disabled', false);
-
-                        // Set max quantity validation
-                        if (parseInt(jumlahInput.val()) > stock) {
-                            jumlahInput.val(stock);
-                            maxStockInfo.html('<span class="max-stock">Jumlah melebihi stok tersedia!</span>');
-                        }
-                    }
-
-                    hitungTotal();
-                });
-
-                // Validate quantity input
-                jumlahInput.on('input', function() {
-                    let maxStock = parseInt($(this).attr('max')) || 0;
-                    let enteredQty = parseInt($(this).val()) || 0;
-
-                    if (enteredQty > maxStock) {
-                        maxStockInfo.html('<span class="max-stock">Jumlah melebihi stok tersedia!</span>');
-                        $(this).val(maxStock);
-                    } else if (enteredQty <= 0) {
-                        $(this).val(1);
-                    } else {
-                        maxStockInfo.html('');
-                    }
-
-                    hitungTotal();
-                });
-
-                // Recalculate when price changes
-                hargaInput.on('input', function() {
-                    hitungTotal();
-                });
-            }
-
-            // Add new item
-            $('#btnAddItem').on('click', function() {
-                let itemIndex = $('.item-row').length;
-
-                let item = `
-                <div class="item-row row mb-3 p-2 border">
-                    <div class="col-md-4">
-                        <label>Kue</label>
-                        <select name="kue[]" class="form-control select-kue" required>
-                            <option value="">-- Pilih Kue --</option>
-                            <?php foreach ($kue_tersedia as $k): ?>
-                                <option 
+        // Add item dynamically
+        $('#btnAddItem').click(function() {
+            let item = `
+                    <div class="item-row row mb-3 p-2 border">
+                        <div class="col-md-4">
+                            <label>Kue</label>
+                            <select name="kue[]" class="form-control select-kue" required>
+                                <option value="">-- Pilih Kue --</option>
+                                <?php foreach ($kue_tersedia as $k): ?>
+                                    <option
                                     value="<?= $k['id_stok_kue_tertua'] ?>"
                                     data-harga="<?= $k['harga_tertua'] ?>"
                                     data-stock="<?= $k['total_stock'] ?>"
-                                    data-exp="<?= $k['exp_tertua'] ?>">
-                                    <?= htmlspecialchars($k['nama_kue']) ?> (Stok: <?= $k['total_stock'] ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <div class="stock-info">Stok tersedia: <span class="stock-amount">0</span></div>
-                    </div>
-                    <div class="col-md-2">
-                        <label>Jumlah</label>
-                        <input type="number" name="jumlah[]" class="form-control jumlah" value="1" min="1" required>
-                        <div class="max-stock-info"></div>
-                    </div>
-                    <div class="col-md-2">
-                        <label>Harga</label>
-                        <input type="number" name="harga[]" class="form-control harga" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label>Nabung per Item</label>
-                        <input type="number" name="poin[]" class="form-control poin" value="0" min="0">
-                    </div>
-                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        <button type="button" class="btn btn-danger btn-remove-item"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>`;
+                                    data-exp="<?= $k['exp_tertua'] ?>"
+                                    >
+                                    
 
-                $('#itemContainer').append(item);
-                initItemEvents($('#itemContainer .item-row').last());
+                                    <?= htmlspecialchars($k['nama_kue']) ?>
+                                    (Stok: <?= $k['total_stock'] ?> <?php // , Exp: <?= tgl_indo($k['exp_tertua']) 
+                                                                    ?>)
 
-                // Hitung total setelah menambahkan item
+                                    </option>
+                                <?php endforeach; ?>
+
+
+                            </select>
+                            <div class="stock-info">Stok tersedia: <span class="stock-amount">0</span></div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Jumlah</label>
+                            <input type="number" name="jumlah[]" class="form-control jumlah" value="1" min="1" required>
+                            <div class="max-stock-info"></div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Harga</label>
+                            <input type="number" name="harga[]" class="form-control harga" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Nabung per Item</label>
+                            <input type="number" name="poin[]" class="form-control poin" value="0" min="0">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <button type="button" class="btn btn-danger btn-remove-item"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>`;
+            $('#itemContainer').append(item);
+
+            // Initialize the new item
+            initItem($('#itemContainer .item-row').last());
+        });
+
+        // Initialize item
+        function initItem(item) {
+            let select = item.find('.select-kue');
+            let jumlahInput = item.find('.jumlah');
+            let stockAmount = item.find('.stock-amount');
+            let maxStockInfo = item.find('.max-stock-info');
+            let hargaInput = item.find('.harga');
+
+            // Update stock info when cake is selected
+            select.change(function() {
+                let selectedOption = $(this).find('option:selected');
+                let stock = parseInt(selectedOption.data('stock')) || 0;
+                let price = parseFloat(selectedOption.data('harga')) || 0;
+
+                stockAmount.text(stock);
+                hargaInput.val(price);
+
+                // Set max value for quantity input
+                jumlahInput.attr('max', stock);
+
+                // Check if stock is available
+                if (stock <= 0) {
+                    maxStockInfo.html('<span class="max-stock">Stok habis!</span>');
+                    jumlahInput.val(0).prop('disabled', true);
+                } else {
+                    maxStockInfo.html('');
+                    jumlahInput.val(1).prop('disabled', false);
+                }
+
                 hitungTotal();
             });
 
-            // Remove item (using event delegation)
-            $(document).on('click', '.btn-remove-item', function() {
-                if ($('.item-row').length > 1) {
-                    $(this).closest('.item-row').remove();
-                    hitungTotal();
+            // Validate quantity input
+            jumlahInput.on('input', function() {
+                let maxStock = parseInt(jumlahInput.attr('max')) || 0;
+                let enteredQty = parseInt($(this).val()) || 0;
+
+                if (enteredQty > maxStock) {
+                    maxStockInfo.html('<span class="max-stock">Melebihi stok tersedia!</span>');
+                    $(this).val(maxStock);
+                } else if (enteredQty <= 0) {
+                    $(this).val(1);
                 } else {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Peringatan',
-                        text: 'Minimal harus ada satu item penjualan'
-                    });
+                    maxStockInfo.html('');
                 }
+
+                hitungTotal();
             });
 
-            // Save button confirmation
-            $('#btnSimpan').on('click', function(e) {
-                e.preventDefault();
+            // Trigger change event to initialize
+            select.trigger('change');
+        }
 
-                // Validate form
-                let isValid = true;
-                $('.item-row').each(function() {
-                    let kue = $(this).find('.select-kue').val();
-                    let jumlah = $(this).find('.jumlah').val();
-
-                    if (!kue || !jumlah || parseInt(jumlah) <= 0) {
-                        isValid = false;
-                        return false;
-                    }
-                });
-
-                if (!isValid) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Harap isi semua item dengan benar!'
-                    });
-                    return;
-                }
-
-                if ($('.item-row').length === 0) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Minimal harus ada satu item penjualan!'
-                    });
-                    return;
-                }
-
-                Swal.fire({
-                    title: 'Konfirmasi',
-                    text: 'Apakah Anda yakin ingin menyimpan penjualan ini?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Simpan!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $('#formPenjualan').submit();
-                    }
-                });
-            });
-
-            // Initialize first item automatically
-            if ($('.item-row').length === 0) {
-                $('#btnAddItem').trigger('click');
-            }
+        // Remove item
+        $(document).on('click', '.btn-remove-item', function() {
+            $(this).closest('.item-row').remove();
+            hitungTotal();
         });
-    </script>
-</body>
 
-</html>
+        // Recalculate total on input change
+        $(document).on('input', '#itemContainer .item-row input, #itemContainer .item-row select', function() {
+            hitungTotal();
+        });
+
+        // Initialize first item
+        $('#btnAddItem').trigger('click');
+    });
+</script>
