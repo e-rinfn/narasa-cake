@@ -45,24 +45,6 @@ include '../../includes/header.php';
 
             <?php displayMessage(); ?>
 
-
-            <!-- [ breadcrumb ] start -->
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Pelanggan</h5>
-                            </div>
-                            <ul class="breadcrumb">
-
-                                <li class="breadcrumb-item" aria-current="page">Pelanggan</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- [ breadcrumb ] end -->
             <div class="row">
 
                 <!-- [ Main Content ] start -->

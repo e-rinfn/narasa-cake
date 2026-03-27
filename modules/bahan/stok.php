@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $keterangan
         ]);
 
-        redirectWithMessage("stok.php?id=$id_bahan", 'success', 'Stok berhasil ditambahkan');
+        redirectWithMessage("index.php", 'success', 'Stok berhasil ditambahkan');
     } catch (PDOException $e) {
         redirectWithMessage("stok.php?id=$id_bahan", 'danger', 'Error: ' . $e->getMessage());
     }
@@ -88,24 +88,6 @@ include '../../includes/header.php';
         <div class="pc-content">
 
             <?php displayMessage(); ?>
-
-            <!-- [ breadcrumb ] start -->
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Manajemen</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="index.php">Bahan Baku</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Stok</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- [ breadcrumb ] end -->
 
             <div class="row">
                 <!-- [ Main Content ] start -->
@@ -222,6 +204,7 @@ include '../../includes/header.php';
                                                             <th>Keluar</th>
                                                             <th>Sisa Stok</th>
                                                             <th>Masuk</th>
+                                                            <th>Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -233,6 +216,14 @@ include '../../includes/header.php';
                                                                 <td><?= htmlspecialchars($s['jumlah_masuk'] - $s['jumlah']) ?></td>
                                                                 <td><?= htmlspecialchars($s['jumlah']) ?></td>
                                                                 <td><?= tgl_indo($s['tanggal_masuk']) ?></td>
+                                                                <td class="text-center">
+                                                                    <button type="button" class="btn btn-danger btn-sm btn-batalkan-stok"
+                                                                        data-id="<?= $s['id_stok'] ?>"
+                                                                        data-jumlah="<?= $s['jumlah_masuk'] ?>"
+                                                                        data-keluar="<?= $s['jumlah_masuk'] - $s['jumlah'] ?>">
+                                                                        <i class="ti ti-trash"></i> Batalkan
+                                                                    </button>
+                                                                </td>
                                                             </tr>
                                                         <?php endforeach; ?>
                                                     </tbody>
@@ -274,6 +265,42 @@ include '../../includes/header.php';
                     });
                 });
             }
+
+            // Pembatalan stok
+            const batalkanBtns = document.querySelectorAll(".btn-batalkan-stok");
+            batalkanBtns.forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                    const idStok = this.getAttribute("data-id");
+                    const jumlahMasuk = this.getAttribute("data-jumlah");
+                    const jumlahKeluar = this.getAttribute("data-keluar");
+
+                    if (parseFloat(jumlahKeluar) > 0) {
+                        Swal.fire({
+                            title: "Tidak Dapat Dibatalkan!",
+                            text: "Stok ini sudah digunakan sebanyak " + jumlahKeluar + " dan tidak dapat dibatalkan.",
+                            icon: "error",
+                            confirmButtonText: "OK",
+                            confirmButtonColor: "#6c757d"
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: "Batalkan Stok?",
+                        text: "Anda akan membatalkan stok sebanyak " + jumlahMasuk + ". Data akan dihapus permanen!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Ya, Batalkan",
+                        cancelButtonText: "Tidak",
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#6c757d"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "hapus_stok.php?id=" + idStok + "&id_bahan=<?= $id_bahan ?>";
+                        }
+                    });
+                });
+            });
         });
     </script>
 

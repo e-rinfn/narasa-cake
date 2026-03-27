@@ -43,16 +43,6 @@
                     </div>
                 </div>
             </div>
-            <!-- [ breadcrumb ] end -->
-            <div class="row">
-
-                <!-- [ Main Content ] start -->
-
-
-
-                <!-- [ Main Content ] end -->
-
-            </div>
         </div>
     </div>
 

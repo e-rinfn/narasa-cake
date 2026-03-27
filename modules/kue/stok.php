@@ -62,23 +62,6 @@ include '../../includes/header.php';
 
             <?php displayMessage(); ?>
 
-            <!-- [ breadcrumb ] start -->
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Manajemen</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="index.php">Jenis Kue</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Stok</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- [ breadcrumb ] end -->
             <div class="row">
 
                 <!-- [ Main Content ] start -->
@@ -92,7 +75,7 @@ include '../../includes/header.php';
                                 <div class="col-md-8">
                                     <div class="card">
                                         <div class="card-header text-center">
-                                            <h4>Stok Kue: <?= htmlspecialchars($jenis_kue['nama_kue']) ?></h4>
+                                            <h4>Riwayat Produksi: <?= htmlspecialchars($jenis_kue['nama_kue']) ?></h4>
                                         </div>
                                         <div class="card-body">
                                             <?php if (empty($stok)): ?>
@@ -125,6 +108,12 @@ include '../../includes/header.php';
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target="#editStokModal">
                                                                             <i class="fas fa-edit"></i>
+                                                                        </button>
+                                                                        <button class="btn btn-sm btn-danger btn-batalkan-produksi"
+                                                                            data-id="<?= $row['id_stok_kue'] ?>"
+                                                                            data-jumlah="<?= $row['jumlah'] ?>"
+                                                                            title="Batalkan Produksi">
+                                                                            <i class="fas fa-trash"></i>
                                                                         </button>
                                                                     </td>
                                                                 </tr>
@@ -183,6 +172,7 @@ include '../../includes/header.php';
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function() {
@@ -203,6 +193,27 @@ include '../../includes/header.php';
                 </div>
             </div>
         `);
+            });
+
+            // Pembatalan produksi
+            $('.btn-batalkan-produksi').click(function() {
+                const idStok = $(this).data('id');
+                const jumlah = $(this).data('jumlah');
+
+                Swal.fire({
+                    title: 'Batalkan Produksi?',
+                    text: 'Anda akan membatalkan produksi sebanyak ' + jumlah + ' kue. Data akan dihapus permanen!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Batalkan',
+                    cancelButtonText: 'Tidak',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'hapus_stok.php?id=' + idStok + '&id_jenis_kue=<?= $id_jenis_kue ?>';
+                    }
+                });
             });
         });
     </script>

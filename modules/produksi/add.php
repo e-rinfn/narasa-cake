@@ -85,16 +85,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $sisa_kebutuhan -= $jumlah_dipakai;
             }
 
-            // if ($sisa_kebutuhan > 0) {
-            //     // Hitung total stok tersedia
-            //     $stmt = $db->prepare("SELECT SUM(jumlah) FROM stok_bahan WHERE id_bahan = ?");
-            //     $stmt->execute([$bahan['id_bahan']]);
-            //     $stok_tersedia = $stmt->fetchColumn() ?? 0;
+            if ($sisa_kebutuhan > 0) {
+                // Hitung total stok tersedia dan ambil nama satuan
+                $stmt = $db->prepare("SELECT b.nama_bahan, s.nama_satuan, COALESCE(SUM(sb.jumlah), 0) as stok_tersedia
+                                     FROM bahan_baku b
+                                     JOIN satuan_bahan s ON b.id_satuan = s.id_satuan
+                                     LEFT JOIN stok_bahan sb ON b.id_bahan = sb.id_bahan
+                                     WHERE b.id_bahan = ?
+                                     GROUP BY b.id_bahan");
+                $stmt->execute([$bahan['id_bahan']]);
+                $info_bahan = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            //     $nama_bahan = getBahanName($db, $bahan['id_bahan']);
-            //     throw new Exception("Stok bahan tidak mencukupi untuk $nama_bahan. Dibutuhkan: $jumlah_dibutuhkan");
-            // }
+                $nama_bahan = $info_bahan['nama_bahan'] ?? 'Bahan';
+                $nama_satuan = $info_bahan['nama_satuan'] ?? '';
+                $stok_tersedia = $info_bahan['stok_tersedia'] ?? 0;
 
+                throw new Exception("Stok $nama_bahan tidak mencukupi. Dibutuhkan: $jumlah_dibutuhkan $nama_satuan, Tersedia: $stok_tersedia $nama_satuan");
+            }
         }
 
         // 5. Tambah stok kue hasil produksi
@@ -110,10 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$jenis_kue['id_jenis_kue'], $total_kue, $tanggal_produksi, $tanggal_kadaluarsa]);
 
         $db->commit();
-        redirectWithMessage('add.php', 'success', 'Produksi berhasil dicatat');
+        redirectWithMessage('index.php', 'success', 'Produksi berhasil dicatat');
     } catch (Exception $e) {
         $db->rollBack();
-        redirectWithMessage('add.php', 'danger', 'Error: ' . $e->getMessage());
+        redirectWithMessage('add.php', 'danger', 'Terjadi Kesalahan: ' . $e->getMessage());
     }
 }
 
@@ -143,23 +150,7 @@ include '../../includes/header.php';
     <!-- [ Main Content ] start -->
     <div class="pc-container">
         <div class="pc-content">
-            <!-- [ breadcrumb ] start -->
-            <div class="page-header">
-                <div class="page-block">
-                    <div class="row align-items-center">
-                        <div class="col-md-12">
-                            <div class="page-header-title">
-                                <h5 class="m-b-10">Manajemen</h5>
-                            </div>
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="index.php">Produksi</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Tambah</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- [ breadcrumb ] end -->
+
             <div class="row">
                 <!-- [ Main Content ] start -->
                 <div class="card">

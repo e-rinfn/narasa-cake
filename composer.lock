@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe40b8c5e439f3a1f782d49bf92448e8",
+    "content-hash": "3ae03df44e4ca843fbb64457c27fe2bd",
     "packages": [
         {
             "name": "mike42/escpos-php",
@@ -67,16 +67,16 @@
         },
         {
             "name": "tecnickcom/tcpdf",
-            "version": "6.9.3",
+            "version": "6.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tecnickcom/TCPDF.git",
-                "reference": "d0e8dd17f8a1df3c97b94b9af8356e88e811ed59"
+                "reference": "7a2701251e5d52fc3d508fd71704683eb54f5939"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tecnickcom/TCPDF/zipball/d0e8dd17f8a1df3c97b94b9af8356e88e811ed59",
-                "reference": "d0e8dd17f8a1df3c97b94b9af8356e88e811ed59",
+                "url": "https://api.github.com/repos/tecnickcom/TCPDF/zipball/7a2701251e5d52fc3d508fd71704683eb54f5939",
+                "reference": "7a2701251e5d52fc3d508fd71704683eb54f5939",
                 "shasum": ""
             },
             "require": {
@@ -126,24 +126,24 @@
             ],
             "support": {
                 "issues": "https://github.com/tecnickcom/TCPDF/issues",
-                "source": "https://github.com/tecnickcom/TCPDF/tree/6.9.3"
+                "source": "https://github.com/tecnickcom/TCPDF/tree/6.10.1"
             },
             "funding": [
                 {
-                    "url": "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&currency_code=GBP&business=paypal@tecnick.com&item_name=donation%20for%20tcpdf%20project",
+                    "url": "https://www.paypal.com/donate/?hosted_button_id=NZUEC5XS8MFBJ",
                     "type": "custom"
                 }
             ],
-            "time": "2025-04-20T15:52:50+00:00"
+            "time": "2025-11-21T10:58:21+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": {},
-    "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
 }
